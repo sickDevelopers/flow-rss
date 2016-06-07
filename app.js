@@ -4,12 +4,13 @@
 // =============================================================================
 
 // call the packages we need
-var express    = require('express');        // call express
-var app = module.exports = express();         // define our app using express
+const express    = require('express');        // call express
+const app = module.exports = express();// define our app using expresssll
+var db = require('./lib/db');
 
-var bodyParser = require('body-parser');
-var mongoose = require('mongoose');
-var router = express.Router();
+const bodyParser = require('body-parser');
+const mongoose = require('mongoose');
+
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -21,18 +22,10 @@ app.use(bodyParser.json());
 var port = process.env.PORT || 8080;        // set our port
 
 // BOOTSTRAP
-require('./lib/bootstrap')(app);
-
+require('./lib/bootstrap')();
 
 
 // START THE SERVER
 // =============================================================================
 app.listen(port);
 console.log('Magic happens on port ' + port);
-
-mongoose.connect('mongodb://127.0.0.1:27017/');
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  console.log('Connected...');
-});
