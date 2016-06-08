@@ -14,7 +14,7 @@ FeedController.prototype = {
     router.get('/', function(req, res) {
       this.list(req, res);
     }.bind(this));
-    // LISTING
+    // GET
     router.get('/:id', function(req, res) {
       this.list(req, res);
     }.bind(this));
@@ -30,7 +30,18 @@ FeedController.prototype = {
 
   },
   create: function(req, res) {
-    res.json({ message: 'post OK' });
+    var feedData = req.body;
+    feedData.created_at = new Date();
+    feedData.updated_at = new Date();
+    var newFeed = new Feed(feedData);
+    newFeed.save()
+      .then(function(result) {
+        res.json({ message: result });
+      })
+      .catch(function(error) {
+        res.json({ error: error });
+      })
+
   }
 }
 
