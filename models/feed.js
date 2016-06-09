@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator');
 
 const feedSchema = mongoose.Schema({
   name: {
@@ -7,7 +8,8 @@ const feedSchema = mongoose.Schema({
       },
   url: {
         type: String,
-        required: true
+        required: true,
+        unique: true
       },
   content: {
         type: Array,
@@ -22,5 +24,6 @@ const feedSchema = mongoose.Schema({
         required: true
       }
 });
+feedSchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model('Feed', feedSchema);

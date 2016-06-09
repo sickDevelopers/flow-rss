@@ -1,48 +1,69 @@
 "use strict";
-var express = require('express');
-var app = require('../app');
-var Feed = require('../models/feed');
+const express = require('express');
+const app = require('../app');
+const Feed = require('../models/feed');
+const RssParser = require('../helpers/feedparser');
 
 const router = express.Router();
 
 const FeedController = function FeedController () {}
 
 FeedController.prototype = {
-  setup: function() {
+
+  setup: function () {
   	console.log('setup FeedController routes...');
     // LISTING
-    router.get('/', function(req, res) {
+    router.get('/', ((req, res) => {
       this.list(req, res);
-    }.bind(this));
+    }).bind(this));
+    // BUILD
+    router.get('/digest', ((req, res) => {
+      this.buildDigest(req, res);
+    }).bind(this));
     // GET
-    router.get('/:id', function(req, res) {
+    router.get('/:id', ((req, res) => {
       this.list(req, res);
-    }.bind(this));
+    }).bind(this));
     // ADD
-    router.post('/', function(req, res) {
+    router.post('/', ((req, res) => {
       this.create(req, res);
-    }.bind(this));
+    }).bind(this));
   },
-  list: function(req, res) {
-    Feed.find().then(function(data) {
+
+  list: (req, res) => {
+    Feed.find().then((data) => {
       res.json(data);
     })
-
   },
-  create: function(req, res) {
-    var feedData = req.body;
+
+  create: function (req, res) {
+    let feedData = req.body;
     feedData.created_at = new Date();
     feedData.updated_at = new Date();
-    var newFeed = new Feed(feedData);
-    newFeed.save()
-      .then(function(result) {
+    let newFeed = new Feed(feedData);
+
+    RssParser.parse(newFeed.url)
+      .then((data) => {
+        newFeed.content = data;
+        newFeed.name = data.title;
+        return newFeed;
+      })
+      .then((feed) => {
+        console.log('saving...');
+        return newFeed.save();
+      })
+      .then((result) => {
         res.json({ message: result });
       })
-      .catch(function(error) {
+      .catch((error) => {
         res.json({ error: error });
-      })
+      });
+  },
 
+  buildDigest: function(req, res) {
+    res.json({messsage: 'areo'});
   }
+
 }
 
 app.use('/feeds', router);
