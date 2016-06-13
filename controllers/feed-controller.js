@@ -16,10 +16,6 @@ FeedController.prototype = {
     router.get('/', ((req, res) => {
       this.list(req, res);
     }).bind(this));
-    // BUILD
-    router.get('/digest', ((req, res) => {
-      this.buildDigest(req, res);
-    }).bind(this));
     // GET
     router.get('/:id', ((req, res) => {
       this.list(req, res);
@@ -60,9 +56,6 @@ FeedController.prototype = {
       });
   },
 
-  buildDigest: function(req, res) {
-    res.json({messsage: 'areo'});
-  }
 
 }
 

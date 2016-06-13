@@ -21,7 +21,21 @@ FlowController.prototype = {
     }).bind(this));
     // ADD FEED
     router.post('/:id/feeds', ((req, res) => {
-      this.addFeedToUserFlow(req, res)
+      this.addFeedToUserFlow(req)
+        .then((result) => {
+          res.json(result);
+        })
+        .catch((error) => {
+          res.json({error: error})
+        });
+    }).bind(this));
+    // DIGEST
+    router.get('/:id/digest', ((req, res) => {
+      this.buildDigest(req, res);
+    }).bind(this));
+    // DELETE FEED
+    router.delete('/:id/feeds', ((req, res) => {
+      this.deleteFeedOnUserFlow(req)
         .then((result) => {
           res.json(result);
         })
@@ -53,7 +67,7 @@ FlowController.prototype = {
       });
   },
 
-  addFeedToUserFlow: function (req, res) {
+  addFeedToUserFlow: function (req) {
     // req.body = { url }
     if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
       throw "Invalid flow id";
@@ -61,10 +75,42 @@ FlowController.prototype = {
     let flowQuery = UserFlow.findById(req.params.id);
     return flowQuery.exec()
       .then((flow) => {
+        console.log('adding feed to '+ req.params.id + ' flow' );
         if(flow) {
             return flow.addFeed(req.body.url);
         }
         throw "No user flow found";
+      })
+  },
+
+  deleteFeedOnUserFlow: function(req) {
+    // req.body = { url }
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      throw "Invalid flow id";
+    }
+    let flowQuery = UserFlow.findById(req.params.id);
+    return flowQuery.exec()
+      .then((flow) => {
+        console.log('removing feed to '+ req.params.id + ' flow' );
+        if(flow) {
+            return flow.deleteFeed(req.body.url);
+        }
+        throw "No user flow found";
+      })
+  },
+
+  buildDigest: function(req, res) {
+    // req.body = { }
+    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
+      throw "Invalid flow id";
+    }
+    let flowQuery = UserFlow.findById(req.params.id);
+    return flowQuery.exec()
+      .then((flow) => {
+        return flow.buildDigest();
+      })
+      .catch((error) => {
+        res.json({error: error});
       })
   }
 

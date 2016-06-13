@@ -27,6 +27,7 @@ UserController.prototype = {
           res.json({error: error});
         });
     }).bind(this));
+
     // ADD
     router.post('/', ((req, res) => {
       this.create(req, res);
@@ -74,7 +75,7 @@ UserController.prototype = {
       .catch((error) => {
         res.json(error);
       });
-  }
+  },
 
 }
 
