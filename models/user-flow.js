@@ -52,7 +52,7 @@ userFlowSchema.methods.hasFeed = function(url) {
 userFlowSchema.methods.buildDigest = function() {
 
   let promises = this.feeds.map(function(feed) {
-    if (validUrl.isUri(feed) {
+    if (validUrl.isUri(feed)) {
       return new Promise(function(resolve, reject) {
         let feedQuery = Feed.find({
           url: feed
@@ -60,7 +60,7 @@ userFlowSchema.methods.buildDigest = function() {
         feedQuery.exec()
           .then(function(feedData) {
             resolve(feedData.name);
-          }
+          });
       });
     }
   });
@@ -68,7 +68,7 @@ userFlowSchema.methods.buildDigest = function() {
   return Promise.all(promises)
     .then(function() {
       return {
-        message: "Done";
+        message: "Done"
       }
     })
 
