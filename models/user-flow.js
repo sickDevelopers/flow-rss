@@ -2,6 +2,7 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const validUrl = require('valid-url');
+const Feed = require('./feed');
 
 const userFlowSchema = mongoose.Schema({
   user_id: {
@@ -37,38 +38,52 @@ userFlowSchema.methods.addFeed = function(url) {
 }
 
 userFlowSchema.methods.deleteFeed = function(url) {
-  this.feeds = this.feeds.filter(function(feed) {
+  this.feeds = this.feeds.filter((feed) => {
     return feed !== url;
   })
   return this.save();
 }
 
 userFlowSchema.methods.hasFeed = function(url) {
-  return this.feeds.find(function(feed) {
+  return this.feeds.find((feed) => {
     return feed === url;
   })
 }
 
 userFlowSchema.methods.buildDigest = function() {
 
-  let promises = this.feeds.map(function(feed) {
+  let promises = this.feeds.map((feed) => {
     if (validUrl.isUri(feed)) {
-      return new Promise(function(resolve, reject) {
-        let feedQuery = Feed.find({
+      return new Promise((resolve, reject) =>  {
+        let feedQuery = Feed.findOne({
           url: feed
         });
         feedQuery.exec()
-          .then(function(feedData) {
-            resolve(feedData.name);
+          .then((feedData) =>  {
+            let articles = feedData.content[0].articles.map((articleData) => {
+              return {
+                author: articleData.author,
+                description: articleData.description,
+                date: articleData.date,
+                summary: articleData.summary,
+                origlink: articleData.origlink,
+                title: articleData.title
+              }
+            })
+            resolve(articles);
+          })
+          .catch((error) => {
+            reject(error);
           });
       });
     }
+    return null;
   });
 
   return Promise.all(promises)
-    .then(function() {
+    .then((data) => {
       return {
-        message: "Done"
+        message: data
       }
     })
 

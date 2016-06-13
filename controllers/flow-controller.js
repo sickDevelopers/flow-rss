@@ -31,7 +31,13 @@ FlowController.prototype = {
     }).bind(this));
     // DIGEST
     router.get('/:id/digest', ((req, res) => {
-      this.buildDigest(req, res);
+      this.buildDigest(req)
+        .then((data) => {
+          res.json(data)
+        })
+        .catch((error) => {
+          res.json({error:error});
+        });
     }).bind(this));
     // DELETE FEED
     router.delete('/:id/feeds', ((req, res) => {
@@ -107,11 +113,11 @@ FlowController.prototype = {
     let flowQuery = UserFlow.findById(req.params.id);
     return flowQuery.exec()
       .then((flow) => {
-        return flow.buildDigest();
-      })
-      .catch((error) => {
-        res.json({error: error});
-      })
+        if(flow) {
+          return flow.buildDigest();
+        }
+        throw "Invalid flow id";
+      });
   }
 
 }
