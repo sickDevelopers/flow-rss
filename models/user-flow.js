@@ -51,7 +51,8 @@ userFlowSchema.methods.hasFeed = function(url) {
 }
 
 userFlowSchema.methods.buildDigest = function() {
-
+  let self = this;
+  // retreive all the articles in the feeds from db
   let promises = this.feeds.map((feed) => {
     if (validUrl.isUri(feed)) {
       return new Promise((resolve, reject) =>  {
@@ -60,6 +61,7 @@ userFlowSchema.methods.buildDigest = function() {
         });
         feedQuery.exec()
           .then((feedData) =>  {
+            // map articles to simpler objects
             let articles = feedData.content[0].articles.map((articleData) => {
               return {
                 author: articleData.author,
@@ -70,6 +72,12 @@ userFlowSchema.methods.buildDigest = function() {
                 title: articleData.title
               }
             })
+            // fliter articles, returns only articles after last update
+            .filter((article) => {
+              let update_date = new Date(self.updated_at);
+              return article.date > update_date;
+            });
+
             resolve(articles);
           })
           .catch((error) => {
@@ -82,9 +90,16 @@ userFlowSchema.methods.buildDigest = function() {
 
   return Promise.all(promises)
     .then((data) => {
-      return {
-        message: data
-      }
+      // cut out falsy values
+      data = data.filter((el) => { return el });
+      let content = new Array().concat(...data)
+        // sort by date
+        .sort((a, b) => {
+          return new Date(a.date) < new Date(b.date);
+        });
+      self.flow = content;
+      self.updated_at = new Date();
+      return self.save();
     })
 
 }
