@@ -39,6 +39,26 @@ FlowController.prototype = {
           res.json({error:error});
         });
     }).bind(this));
+    // SEND FLOW
+    router.get('/:id/send', ((req, res) => {
+      this.sendFlow(req)
+        .then((data) => {
+          res.json(data);
+        })
+        .catch((error) => {
+          res.json({error: error});
+        })
+    }).bind(this));
+    // PREVIEW FLOW
+    router.get('/:id/preview', ((req, res) => {
+      this.previewFlow(req)
+        .then((data) => {
+          res.send(data.html);
+        })
+        .catch((error) => {
+          res.json({error: error});
+        })
+    }).bind(this));
     // DELETE FEED
     router.delete('/:id/feeds', ((req, res) => {
       this.deleteFeedOnUserFlow(req)
@@ -64,6 +84,8 @@ FlowController.prototype = {
     userFlow.flow = {};
     userFlow.created_at = new Date();
     userFlow.updated_at = new Date();
+    // set current day of the week as cron schedule
+    userFlow.interval = 'weekly';
     userFlow.save()
       .then((flow) => {
         res.json(user)
@@ -118,6 +140,28 @@ FlowController.prototype = {
         }
         throw "Invalid flow id";
       });
+  },
+
+  sendFlow: function(req) {
+    let flowQuery = UserFlow.findById(req.params.id);
+    return flowQuery.exec()
+      .then((flow) => {
+        if(flow) {
+          return flow.send();
+        }
+        throw "User flow not found";
+      })
+  },
+
+  previewFlow : function(req) {
+    let flowQuery = UserFlow.findById(req.params.id);
+    return flowQuery.exec()
+      .then((flow) => {
+        if(flow) {
+          return flow.preview();
+        }
+        throw "User flow not found";
+      })
   }
 
 }

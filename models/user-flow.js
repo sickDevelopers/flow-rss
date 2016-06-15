@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 const validUrl = require('valid-url');
 const Feed = require('./feed');
+const User = require('./user');
+const mailer = require('../helpers/mailer');
 
 const userFlowSchema = mongoose.Schema({
   user_id: {
@@ -11,6 +13,9 @@ const userFlowSchema = mongoose.Schema({
       },
   feeds: {
     type: Array
+  },
+  send_interval : {
+    type: String
   },
   flow: {
         type: Object,
@@ -102,6 +107,25 @@ userFlowSchema.methods.buildDigest = function() {
       return self.save();
     })
 
+}
+
+userFlowSchema.methods.send = function() {
+  var self = this;
+  return User.findById(this.user_id)
+    .then((user) => {
+      return mailer.prepareMailTemplate(user, self)
+    })
+    .then((template) => {
+      return mailer.send(template);
+    });
+}
+
+userFlowSchema.methods.preview = function() {
+  var self = this;
+  return User.findById(this.user_id)
+    .then((user) => {
+      return mailer.prepareMailTemplate(user, self)
+    });
 }
 
 
