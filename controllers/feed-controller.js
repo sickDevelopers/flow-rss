@@ -24,6 +24,10 @@ FeedController.prototype = {
     router.post('/', ((req, res) => {
       this.create(req, res);
     }).bind(this));
+    // UPDATE
+    router.get('/:id/update', ((req,res) => {
+      this.update(req, res);
+    }).bind(this))
   },
 
   list: (req, res) => {
@@ -56,6 +60,18 @@ FeedController.prototype = {
       });
   },
 
+  update: function(req, res) {
+    Feed.findById(req.params.id)
+      .then((feed) => {
+        return feed.updateArticles();
+      })
+      .then((data) => {
+        res.json(data);
+      })
+      .catch((error) => {
+        res.json({error: error});
+      })
+  }
 
 }
 

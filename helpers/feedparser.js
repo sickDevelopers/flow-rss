@@ -15,15 +15,20 @@ var RssParser = {
       console.log("Parsing " + url + " : response");
       var stream = this;
       if (res.statusCode != 200) {
-        return this.emit('error', new Error('Bad status code'));
+        deferred.reject('Bad status code ' + res.statusCode);
       }
       stream.pipe(feedparser);
     });
+
+    req.on('error', function() {
+      deferred.reject('Connection error');
+    })
 
     feedparser.on('error', function(error) {
       console.log("Parsing " + url + " : error");
       deferred.reject(error);
     });
+
     feedparser.on('readable', function() {
       console.log("Parsing " + url + " : readable");
       // This is where the action is!
@@ -34,7 +39,6 @@ var RssParser = {
       while (item = stream.read()) {
         feedItems.push(item);
       }
-
     });
 
     feedparser.on('end', function() {
