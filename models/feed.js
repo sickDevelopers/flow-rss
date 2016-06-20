@@ -32,7 +32,6 @@ feedSchema.methods.updateArticles = function() {
   let self = this;
   return RssParser.parse(this.url)
     .then(function(feedData) {
-      console.log('COMPARING');
 
       let oldArticles = self.content[0].articles.sort((a, b) => {
         if (new Date(a.date) > new Date(b.date)) {
@@ -44,34 +43,18 @@ feedSchema.methods.updateArticles = function() {
         return 0;
       });
       let lastArticleDate = oldArticles[0].date;
-      console.log(lastArticleDate);
 
       // filter to get only new articles
       let newArticles = feedData.articles.filter((article) => {
         return new Date(article.date) > new Date(lastArticleDate);
       });
 
-      console.log(newArticles.length)
-      console.log("Lenght before", self.content[0].articles.length);
-      self.content[0].articles.push(...newArticles);
-      console.log("Lenght after", self.content[0].articles.length);
+      // deep copy to update entire content
+      let newArticlesCopy = JSON.parse(JSON.stringify(self.content[0].articles.concat(newArticles)));
 
-      return Feed.findOneAndUpdate({
-        _id: self._id
-      }, {
-        'content.0.articles': self.content[0].articles
-      }, function(err, data) {
-        if(err) {
-          console.log(err);
-        }
-        console.log(data);
-      })
+      self.content = new Array(newArticlesCopy);
+      return self.save();
 
-      // return self.update()
-      //   .then((newFeed) => {
-      //     console.log('Feed saved');
-      //     return newArticles;
-      //   });
     })
 }
 

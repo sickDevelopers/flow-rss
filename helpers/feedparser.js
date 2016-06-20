@@ -30,7 +30,6 @@ var RssParser = {
     });
 
     feedparser.on('readable', function() {
-      console.log("Parsing " + url + " : readable");
       // This is where the action is!
       var stream = this
         , meta = this.meta // **NOTE** the "meta" is always available in the context of the feedparser instance
