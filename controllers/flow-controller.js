@@ -111,7 +111,7 @@ FlowController.prototype = {
       })
   },
 
-  deleteFeedOnUserFlow: function(req) {
+  deleteFeedOnUserFlow: function (req) {
     // req.body = { url }
     if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
       throw "Invalid flow id";
@@ -127,7 +127,7 @@ FlowController.prototype = {
       })
   },
 
-  buildDigest: function(req, res) {
+  buildDigest: function (req, res) {
     // req.body = { }
     if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
       throw "Invalid flow id";
@@ -142,7 +142,7 @@ FlowController.prototype = {
       });
   },
 
-  sendFlow: function(req) {
+  sendFlow: function (req) {
     let flowQuery = UserFlow.findById(req.params.id);
     return flowQuery.exec()
       .then((flow) => {
@@ -153,7 +153,7 @@ FlowController.prototype = {
       })
   },
 
-  previewFlow : function(req) {
+  previewFlow : function (req) {
     let flowQuery = UserFlow.findById(req.params.id);
     return flowQuery.exec()
       .then((flow) => {
