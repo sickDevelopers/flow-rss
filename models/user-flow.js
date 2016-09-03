@@ -5,6 +5,7 @@ const validUrl = require('valid-url');
 const Feed = require('./feed');
 const User = require('./user');
 const mailer = require('../helpers/mailer');
+const RssParser = require('../helpers/feedparser');
 
 const userFlowSchema = mongoose.Schema({
   user_id: {
@@ -32,14 +33,38 @@ const userFlowSchema = mongoose.Schema({
 userFlowSchema.plugin(uniqueValidator);
 
 userFlowSchema.methods.addFeed = function(url) {
+  let self = this;
   if(this.hasFeed(url)) {
     throw "Feed already added";
   }
   if (!validUrl.isUri(url)) {
     throw "Invalid URL";
   }
-  this.feeds.push(url);
-  return this.save();
+
+  // TODO: check if feed exists in database
+  // if not, add to database
+  let feedData = {
+    url: url
+  };
+  feedData.created_at = new Date();
+  feedData.updated_at = new Date();
+  let newFeed = new Feed(feedData);
+
+  return RssParser.parse(newFeed.url)
+    .then((data) => {
+      newFeed.content = data;
+      newFeed.name = data.title;
+      return newFeed;
+    })
+    .then((feed) => {
+      console.log('saving feed...');
+      return newFeed.save();
+    })
+    .then((result) => {
+      self.feeds.push(url);
+      return self.save();
+    })
+
 }
 
 userFlowSchema.methods.deleteFeed = function(url) {
