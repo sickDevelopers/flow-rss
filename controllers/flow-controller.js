@@ -15,6 +15,11 @@ FlowController.prototype = {
     router.get('/:id', ((req, res) => {
       this.list(req, res);
     }).bind(this));
+    // GET all
+    // TODO adapt to use authentication
+    router.get('/all', ((req, res) => {
+      this.list(req, res);
+    }).bind(this));
     // ADD
     router.post('/', ((req, res) => {
       this.create(req, res);

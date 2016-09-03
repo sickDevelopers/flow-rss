@@ -1,6 +1,12 @@
 # Flow RSS
 
 ### Start the project
+S
+Start local mongodb
+
+```
+$ mongod --dbpath <your local data folder>
+```
 
 To start the project, first npm install, then create a file named .env with the following content
 
