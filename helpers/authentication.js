@@ -11,7 +11,7 @@ const githubOauth2 = require('simple-oauth2')({
 });
 
 // Callback service parsing the authorization token and asking for the access token
-app.get('/authback', function (req, res) {
+app.get('/github-authback', function (req, res) {
   var code = req.query.code;
 
   githubOauth2.authCode.getToken({
@@ -21,7 +21,9 @@ app.get('/authback', function (req, res) {
 
   function saveToken(error, result) {
     if (error) { console.log('Access Token Error', error.message); }
-    token = oauth2.accessToken.create(result);
+
+    // TODO save token in user db
+    token = githubOauth2.accessToken.create(result);
   }
 });
 
