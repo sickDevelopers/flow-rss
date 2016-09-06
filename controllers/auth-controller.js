@@ -2,6 +2,7 @@
 const express = require('express');
 const app = require('../app');
 const auth = require('../helpers/authentication');
+const user = require('../models/user.js');
 
 const router = express.Router();
 
@@ -19,6 +20,31 @@ AuthController.prototype = {
     app.get('/' + process.env.GITHUB_AUTH_BACK, (function (req, res) {
       this.handleGithubAuthBack(req, res);
     }).bind(this));
+
+    // Callback service parsing the authorization token and asking for the access token
+    app.get('/github-authback', function (req, res) {
+      var code = req.query.code;
+
+      githubOauth2.authCode.getToken({
+        code: code,
+        redirect_uri: 'http://localhost:5000/github-authback'
+      }, saveToken);
+
+      function saveToken(error, result) {
+        if (error) {
+          console.log('Access Token Error', error.message);
+        }
+
+        // TODO save token in user db
+        var token = githubOauth2.accessToken.create(result);
+        User.createOauthUser(token)
+          .then(function() {
+            
+          });
+
+      }
+    });
+
   },
 
   handleGithubAuthBack : function (req, res) {

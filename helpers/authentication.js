@@ -2,6 +2,7 @@
 const express = require('express');
 const app = require('../app');
 
+
 const githubOauth2 = require('simple-oauth2')({
   clientID: process.env.GITHUB_CLIENT_ID,
   clientSecret: process.env.GITHUB_CLIENT_SECRET,
@@ -10,22 +11,7 @@ const githubOauth2 = require('simple-oauth2')({
   authorizationPath: '/oauth/authorize'
 });
 
-// Callback service parsing the authorization token and asking for the access token
-app.get('/github-authback', function (req, res) {
-  var code = req.query.code;
 
-  githubOauth2.authCode.getToken({
-    code: code,
-    redirect_uri: 'http://localhost:3000/callback'
-  }, saveToken);
-
-  function saveToken(error, result) {
-    if (error) { console.log('Access Token Error', error.message); }
-
-    // TODO save token in user db
-    token = githubOauth2.accessToken.create(result);
-  }
-});
 
 module.exports = {
   // Authorization uri definition

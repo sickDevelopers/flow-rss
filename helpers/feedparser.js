@@ -1,4 +1,4 @@
-var FeedParser = require('feedparser')
+const FeedParser = require('feedparser')
   , request = require('request')
   , q = require('q');
 
