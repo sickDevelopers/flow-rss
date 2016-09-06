@@ -1,5 +1,6 @@
 "use strict";
 const express = require('express');
+const url = require('url');
 const app = require('../app');
 const auth = require('../helpers/authentication');
 const user = require('../models/user.js');
@@ -17,49 +18,44 @@ AuthController.prototype = {
     app.get('/github-auth', function (req, res) {
       res.redirect(auth.githubAuthorizationUri);
     });
-    app.get('/' + process.env.GITHUB_AUTH_BACK, (function (req, res) {
-      this.handleGithubAuthBack(req, res);
-    }).bind(this));
-
     // Callback service parsing the authorization token and asking for the access token
-    app.get('/github-authback', function (req, res) {
-      var code = req.query.code;
-
-      githubOauth2.authCode.getToken({
-        code: code,
-        redirect_uri: 'http://localhost:5000/github-authback'
-      }, saveToken);
-
-      function saveToken(error, result) {
-        if (error) {
-          console.log('Access Token Error', error.message);
-        }
-
-        // TODO save token in user db
-        var token = githubOauth2.accessToken.create(result);
-        User.createOauthUser(token)
-          .then(function() {
-            
-          });
-
-      }
-    });
+    app.get('/' + process.env.GITHUB_AUTH_BACK, function (req, res) {
+      const self = this;
+      this.handleGithubAuthBack(req, res)
+        .then(function(data) {
+          console.log('HAVE TO SAVE');
+          console.log(data);
+        })
+    }.bind(this));
 
   },
 
   handleGithubAuthBack : function (req, res) {
-    const code = req.params.code;
-    auth.getGithubToken({
-      code: code,
-      redirect_uri: process.env.PROTOCOL +'://'+ process.env.DOMAIN +':'+ process.env.PORT +'/callback'
-    }, this.saveGithubToken);
+
+    var code = req.query.code;
+    console.log('CODE', code);
+
+    return new Promise(function(resolve, reject) {
+      auth.getGithubToken({
+        code: code,
+        redirect_uri: process.env.PROTOCOL +'://'+ process.env.DOMAIN +':'+ process.env.PORT +'/github-authback'
+      }, function(err, res) {
+        if (err !== null) {
+          return reject(err);
+        }
+        return resolve(res);
+      });
+    });
+
+
   },
 
-  saveGithubToken : function (err, res) {
-    if (error) {
-      console.log('Access Token Error', error.message);
+  saveGithubToken : function (err, result) {
+    if (err !== null) {
+      console.log('Access Token Error', err.message);
     }
-    const token = createGithubAccessToken(result);
+    const token = auth.createGithubAccessToken(result);
+    console.log(token);
   }
 
 }
