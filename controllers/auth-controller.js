@@ -23,39 +23,50 @@ AuthController.prototype = {
       const self = this;
       this.handleGithubAuthBack(req, res)
         .then(function(data) {
-          console.log('HAVE TO SAVE');
-          console.log(data);
+          return self.saveGithubToken(data);
+        })
+        .then(function(saveExit) {
+          res.json(saveExit);
+        })
+        .catch(function(err) {
+          res.json(err);
         })
     }.bind(this));
 
   },
 
   handleGithubAuthBack : function (req, res) {
-
     var code = req.query.code;
-    console.log('CODE', code);
-
     return new Promise(function(resolve, reject) {
       auth.getGithubToken({
         code: code,
         redirect_uri: process.env.PROTOCOL +'://'+ process.env.DOMAIN +':'+ process.env.PORT +'/github-authback'
       }, function(err, res) {
-        if (err !== null) {
+        if (err) {
           return reject(err);
         }
         return resolve(res);
       });
     });
-
-
   },
 
-  saveGithubToken : function (err, result) {
-    if (err !== null) {
-      console.log('Access Token Error', err.message);
+  saveGithubToken : function (queryParams) {
+    const params = {};
+    const tokenObj = auth.createGithubAccessToken(queryParams);
+    const tokenParams = {};
+    // check for errors in queryParams
+    queryParams.split('&').forEach(function(couple) {
+      params[couple.split('=')[0]] = couple.split('=')[1];
+    });
+    if (params.error) {
+      throw params.error_description;
     }
-    const token = auth.createGithubAccessToken(result);
-    console.log(token);
+    // parse access Token uri
+    tokenObj.token.split('&').forEach(function(couple) {
+      tokenParams[couple.split('=')[0]] = couple.split('=')[1];
+    });
+    // tonek params
+    return tokenParams;
   }
 
 }
