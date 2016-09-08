@@ -4,6 +4,7 @@ const url = require('url');
 const app = require('../app');
 const auth = require('../helpers/authentication');
 const user = require('../models/user.js');
+const request = require('request');
 
 const router = express.Router();
 
@@ -16,36 +17,58 @@ AuthController.prototype = {
     // GITHUB
     // Initial page redirecting to Github
     app.get('/github-auth', function (req, res) {
-      res.redirect(auth.githubAuthorizationUri);
+      res.json({
+        auth_url: auth.githubAuthorizationUri
+      })
+      // request(auth.githubAuthorizationUri, function(err, result) {
+      //   console.log(result.body);
+      // });
     });
     // Callback service parsing the authorization token and asking for the access token
-    app.get('/' + process.env.GITHUB_AUTH_BACK, function (req, res) {
-      const self = this;
+    app.post('/github-authback', function (req, res) {
+    //   const self = this;
       this.handleGithubAuthBack(req, res)
-        .then(function(data) {
-          return self.saveGithubToken(data);
+        .then(function(response) {
+          res.json(res);
         })
-        .then(function(saveExit) {
-          res.json(saveExit);
-        })
-        .catch(function(err) {
-          res.json(err);
-        })
+        .catch(function(error) {
+          res.json(error);
+        });
+
+    //     .then(function(data) {
+    //       return self.saveGithubToken(data);
+    //     })
+    //     .then(function(saveExit) {
+    //       res.json(saveExit);
+    //     })
+    //     .catch(function(err) {
+    //       res.json(err);
+    //     })
     }.bind(this));
 
   },
 
   handleGithubAuthBack : function (req, res) {
-    var code = req.query.code;
+    var code = req.params.code;
+    console.log('code', code);
     return new Promise(function(resolve, reject) {
       auth.getGithubToken({
         code: code,
-        redirect_uri: 'http://localhost:5000/github-authback' //process.env.PROTOCOL +'://'+ process.env.DOMAIN +':'+ process.env.PORT +'/github-authback'
+        redirect_uri: 'http://localhost:8000/#/github-authback' //process.env.PROTOCOL +'://'+ process.env.DOMAIN +':'+ process.env.PORT +'/github-authback'
       }, function(err, res) {
-        console.log('response');
+        console.log('response', res);
+        console.log('err', err);
         if (err) {
           return reject(err);
         }
+        var params = {};
+        res.split('&').forEach(function(couple) {
+          params[couple.split('=')[0]] = couple.split('=')[1];
+        });
+        if (params.error) {
+          return reject(params.error_description);
+        }
+
         return resolve(res);
       });
     });
