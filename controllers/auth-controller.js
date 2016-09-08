@@ -40,8 +40,9 @@ AuthController.prototype = {
     return new Promise(function(resolve, reject) {
       auth.getGithubToken({
         code: code,
-        redirect_uri: process.env.PROTOCOL +'://'+ process.env.DOMAIN +':'+ process.env.PORT +'/github-authback'
+        redirect_uri: 'http://localhost:5000/github-authback' //process.env.PROTOCOL +'://'+ process.env.DOMAIN +':'+ process.env.PORT +'/github-authback'
       }, function(err, res) {
+        console.log('response');
         if (err) {
           return reject(err);
         }
@@ -65,8 +66,9 @@ AuthController.prototype = {
     tokenObj.token.split('&').forEach(function(couple) {
       tokenParams[couple.split('=')[0]] = couple.split('=')[1];
     });
-    // tonek params
-    return tokenParams;
+    // token params
+    // app.use(express.session({access_token: tokenParams.access_token}));
+    return tokenParams.access_token;
   }
 
 }

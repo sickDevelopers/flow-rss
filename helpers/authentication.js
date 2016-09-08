@@ -16,7 +16,7 @@ const githubOauth2 = require('simple-oauth2')({
 module.exports = {
   // Authorization uri definition
   githubAuthorizationUri : githubOauth2.authCode.authorizeURL({
-    redirect_uri: process.env.PROTOCOL + "://" + process.env.DOMAIN + ":" + process.env.PORT + "/" + process.env.GITHUB_AUTH_BACK,
+    redirect_uri: 'http://localhost:5000/github-authback', //process.env.PROTOCOL + "://" + process.env.DOMAIN + ":" + process.env.PORT + "/" + process.env.GITHUB_AUTH_BACK,
     scope: 'notifications',
     state: '3(#0/!~'
   }),
