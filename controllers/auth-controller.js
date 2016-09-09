@@ -29,7 +29,8 @@ AuthController.prototype = {
     //   const self = this;
       this.handleGithubAuthBack(req, res)
         .then(function(response) {
-          res.json(res);
+          console.log('solved response', response);
+          res.json(response);
         })
         .catch(function(error) {
           res.json(error);
@@ -49,27 +50,27 @@ AuthController.prototype = {
   },
 
   handleGithubAuthBack : function (req, res) {
-    var code = req.params.code;
+    var code = req.body.code;
     console.log('code', code);
     return new Promise(function(resolve, reject) {
       auth.getGithubToken({
         code: code,
         redirect_uri: 'http://localhost:8000/#/github-authback' //process.env.PROTOCOL +'://'+ process.env.DOMAIN +':'+ process.env.PORT +'/github-authback'
-      }, function(err, res) {
-        console.log('response', res);
+      }, function(err, response) {
+        console.log('response', response);
         console.log('err', err);
         if (err) {
           return reject(err);
         }
         var params = {};
-        res.split('&').forEach(function(couple) {
+        response.split('&').forEach(function(couple) {
           params[couple.split('=')[0]] = couple.split('=')[1];
         });
         if (params.error) {
           return reject(params.error_description);
         }
 
-        return resolve(res);
+        return resolve(params);
       });
     });
   },

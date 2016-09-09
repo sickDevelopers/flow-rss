@@ -29,4 +29,4 @@ Start the project with
 npm start
 ```
 
-this will start foreman with local env parameters red from .env
+this will start foreman with local environment parameters read from .env
