@@ -30,6 +30,7 @@ AuthController.prototype = {
       this.handleGithubAuthBack(req, res)
         .then(function(response) {
           console.log('solved response', response);
+          req.session.access_token = response.access_token;
           res.json(response);
         })
         .catch(function(error) {

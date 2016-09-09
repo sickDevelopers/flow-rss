@@ -5,6 +5,7 @@ const User = require('../models/user');
 const UserFlow = require('../models/user-flow');
 const mongoose = require('mongoose');
 
+
 const router = express.Router();
 
 const UserController = function UserController () {}
@@ -13,12 +14,14 @@ UserController.prototype = {
 
   setup: function () {
   	console.log('setup UserController routes...');
-    // GET
+    // GET PROFILE
     router.get('/', ((req, res) => {
+      console.log(req.session.access_token);
+
       this.list(req, res);
     }).bind(this));
     // GET USER FLOW
-    router.get('/:id/flows', ((req, res) => {
+    router.get('/flows', ((req, res) => {
       this.getUserFlows(req)
         .then((data) => {
           res.json(data)

@@ -13,6 +13,7 @@
     "body-parser": "^1.15.1",
     "email-templates": "^2.3.0",
     "express": "^4.13.4",
+    "express-session": "^1.14.1",
     "feedparser": "^1.1.4",
     "foreman": "1.4.1",
     "jade": "^1.11.0",

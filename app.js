@@ -5,6 +5,7 @@
 
 // call the packages we need
 const express    = require('express');        // call express
+const session = require('express-session');  // include session handler
 const app = module.exports = express();// define our app using expresssll
 var db = require('./lib/db');
 
@@ -27,6 +28,12 @@ app.use(function(req, res, next) {
     next();
 });
 
+// session data
+app.use(session({
+  access_token: '',
+  secret: '7625alsd4357fngho6789uawhp54tuivabjklhcsiojdv'
+}));
+
 
 var port = process.env.PORT || 8080;        // set our port
 
@@ -38,4 +45,3 @@ require('./lib/bootstrap')();
 // =============================================================================
 app.listen(port);
 console.log("Magic happens on port " + port);
-
